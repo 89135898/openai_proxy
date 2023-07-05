@@ -1,18 +1,14 @@
-  const express = require('express')
-  const {
-    createProxyMiddleware
-  } = require('http-proxy-middleware');
-  const app = express()
-  const port = 9000
+import { serve } from "https://deno.land/std@0.181.0/http/server.ts";
 
-  app.use('/', createProxyMiddleware({
-    target: 'https://api.openai.com',
-    changeOrigin: true,
-    onProxyRes: function (proxyRes, req, res) {
-      proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-    }
-  }));
+const OPENAI_API_HOST = "api.openai.com";
 
-  app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`)
-  })
+serve(async (request) => {
+  const url = new URL(request.url);
+
+  if (url.pathname === "/") {
+    return fetch(new URL("./Readme.md", import.meta.url));
+  }
+
+  url.host = OPENAI_API_HOST;
+  return await fetch(url, request);
+});
